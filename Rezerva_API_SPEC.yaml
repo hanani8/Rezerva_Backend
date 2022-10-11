@@ -1,0 +1,526 @@
+openapi: 3.0.0
+info:
+  title: Rezerva API specification
+  description: The API Specification for Rezerva
+
+  version: 1.0.0
+servers:
+  - url: http://127.0.0.1:5000/
+paths:
+  /api/reservations:
+    description: To Read Paginated Reservations of a Restaurant
+    get:
+      description: Operation to Read Paginated Reservations.
+      parameters:
+        - in: query
+          name: offset
+          required: true
+          schema:
+            type: integer
+            example: 201
+        - in: query
+          name: limit
+          required: true
+          schema:
+            type: integer
+            example: 201            
+      responses:
+        '200':
+          description: All Reservations of this Restaurant
+          content:
+            application/json:
+              schema:
+                title: Reservations Array
+                type: array
+                items:
+                  type: object
+                  properties:
+                    restaurant_id:
+                      type: integer
+                      example: 201
+                    userName:
+                      type: string
+                      example: ajay
+                    guestName:
+                      type: string
+                      example: jai
+                    noOfPeople:
+                      type: number
+                      example: 4
+                    phone:
+                      type: string
+                      example: "8897351040"
+                    when:
+                      type: string
+                      example: "..."
+                    comment:
+                      type: string
+                      example: "Get me by the fireplace"
+                    status:
+                      type: string
+                      example: "confirmed"
+                    timestamp:
+                      type: string
+                      example: "..."
+        '404':
+          description: Restaurant Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_code:
+                    type: string
+                  error_message:
+                    type: string            
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_code:
+                    type: string
+                  error_message:
+                    type: string            
+        '500':
+          description: Internal Server Error
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_code:
+                    type: string
+                  error_message:
+                    type: string
+                    
+  /api/logs/{restaurant_id}/{reservation_id}:
+    description: To Read all the Logs of a Restaurant
+    get:
+      description: Operation to Read all the Logs of a Reservation.
+      parameters:
+        - in: path
+          name: restaurant_id
+          required: true
+          schema:
+            type: integer
+            example: 201        
+        - in: path
+          name: reservation_id
+          required: true
+          schema:
+            type: integer
+            example: 201                    
+      responses:
+        '200':
+          description: All Logs of a Reservation
+          content:
+            application/json:
+              schema:
+                title: Logs Array
+                type: array
+                items:
+                  type: object
+                  properties:
+                    reservation_id:
+                      type: integer
+                      example: 201
+                    log_id:
+                      type: integer
+                      example: 1
+                    by:
+                      type: object
+                      properties:
+                        user_id:
+                          type: string
+                          example: "1234"
+                        userName:
+                          type: string
+                          example: "ajay"
+                    timestamp:
+                      type: string
+                      description: "12-08-2022T16:02"
+        '404':
+          description: Restaurant or Reservation Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_code:
+                    type: string
+                  error_message:
+                    type: string            
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_code:
+                    type: string
+                  error_message:
+                    type: string            
+        '500':
+          description: Internal Server Error
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_code:
+                    type: string
+                  error_message:
+                    type: string 
+                    
+  /api/logout/:
+    description: To Logout
+    get:
+      responses:
+        '200':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_code:
+                    type: string
+                  error_message:
+                    type: string
+
+  /api/reservation/{reservation_id}:
+    description: To read, and update a Reservation
+    get:
+      description: To Read a Reservation.
+      parameters:
+        - in: path
+          name: reservation_id
+          required: true
+          schema:
+            type: integer
+            example: 201
+      responses:
+        '200':
+          description: Request Successful
+          content:
+            application/json:
+              schema:
+                title: Reservation Object
+                type: object
+                properties:
+                  reservation_id:
+                    type: integer
+                    example: 201
+                  userName:
+                    type: string
+                    example: ajay
+                  guestName:
+                    type: string
+                    example: jai
+                  noOfPeople:
+                    type: number
+                    example: 4
+                  phone:
+                    type: string
+                    example: "8897351040"
+                  when:
+                    type: string
+                    example: "..."
+                  comment:
+                    type: string
+                    example: "Get me by the fireplace"
+                  status:
+                    type: string
+                    example: "confirmed"
+                  timestamp:
+                    type: string
+                    example: "..."
+        '404':
+          description: Reservation or Restaurant Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_code:
+                    type: string
+                  error_message:
+                    type: string            
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_code:
+                    type: string
+                  error_message:
+                    type: string            
+        '500':
+          description: Internal Server Error
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_code:
+                    type: string
+                  error_message:
+                    type: string
+
+    put:
+      description: Operation to Update the Reservation.
+      parameters:
+        - in: path
+          name: reservation_id
+          required: true
+          schema:
+            type: integer
+            example: 201
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userName:
+                  type: string
+                  example: ajay
+                guestName:
+                  type: string
+                  example: jai
+                noOfPeople:
+                  type: number
+                  example: 4
+                phone:
+                  type: string
+                  example: "8897351040"
+                when:
+                  type: string
+                  example: "..."
+                comment:
+                  type: string
+                  example: "Get me by the fireplace"
+                status:
+                  type: string
+                  example: "confirmed"
+                timestamp:
+                  type: string
+                  example: "..."
+      responses:
+        '200':
+          description: Successfuly updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  reservation_id:
+                    type: integer
+                    example: 201
+                  userName:
+                    type: string
+                    example: ajay
+                  guestName:
+                    type: string
+                    example: jai
+                  noOfPeople:
+                    type: number
+                    example: 4
+                  phone:
+                    type: string
+                    example: "8897351040"
+                  when:
+                    type: string
+                    example: "..."
+                  comment:
+                    type: string
+                    example: "Get me by the fireplace"
+                  status:
+                    type: string
+                    example: "confirmed"
+                  timestamp:
+                    type: string
+                    example: "..."
+        '404':
+          description: Reservation Not Found
+        '500':
+          description: Internal Server Error
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_code:
+                    type: string
+                  error_message:
+                    type: string
+                    
+                    
+  /api/reservation/{reservation_id}/cancel:
+    description: To Cancel a Reservation
+    put:
+      description: Operation to Cancel Resource.
+      parameters:
+        - in: path
+          name: reservation_id
+          required: true
+          schema:
+            type: integer
+            example: 201
+      responses:
+        '200':
+          description: Successfuly Cancelled
+          content:
+            application/json:
+              schema:
+                type: string
+        '404':
+          description: Reservation Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_code:
+                    type: string
+                  error_message:
+                    type: string            
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_code:
+                    type: string
+                  error_message:
+                    type: string            
+        '500':
+          description: Internal Server Error
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_code:
+                    type: string
+                  error_message:
+                    type: string                     
+
+  /api/reservation/:
+    description: To Create New Reservation
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userName:
+                  type: string
+                  example: ajay
+                guestName:
+                  type: string
+                  example: jai
+                noOfPeople:
+                  type: number
+                  example: 4
+                phone:
+                  type: string
+                  example: "8897351040"
+                when:
+                  type: string
+                  example: "..."
+                comment:
+                  type: string
+                  example: "Get me by the fireplace"
+                status:
+                  type: string
+                  example: "confirmed"
+                timestamp:
+                  type: string
+                  example: "..."
+                
+      responses:
+        '201':
+          description: Successfully Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+        '500':
+          description: Internal Server Error
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_code:
+                    type: string
+                  error_message:
+                    type: string
+
+
+  /api/login/:
+    description: To Login
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userName:
+                  type: string
+                  example: "1234"
+                userPassword:
+                  type: string
+                  example: "4321"
+      responses:
+        '200':
+          description: Correct Credentials
+          content:
+            application/json:
+              schema:
+                title: User Object
+                type: object
+                properties:
+                  userName:
+                    type: string
+                    example: "1234"
+        '500':
+          description: Internal Server Error
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errorCode:
+                    type: string
+                  errorMessage:
+                    type: string
