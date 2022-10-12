@@ -11,4 +11,7 @@
  */
 
 require_once "Includes/autoloader.php";
-require_once "/home/hegemon/Cheesecake/PHP_Experimentation/vendor/autoload.php";
+$current_directory = getcwd();
+$level_up = dirname($current_directory, 1);
+$vendor_autloader_path = $level_up . "/vendor/autoload.php";
+require_once $vendor_autloader_path;

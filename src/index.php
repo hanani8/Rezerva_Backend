@@ -19,7 +19,7 @@ header('Access-Control-Allow-Credentials:true');
 /**
  * Allow Requests from Specific Origins
  */
-header('Access-Control-Allow-Origin:' . $_SERVER['HTTP_ORIGIN']);
+header('Access-Control-Allow-Origin: http://localhost:5173');
 
 header('Vary: Origin');
 
