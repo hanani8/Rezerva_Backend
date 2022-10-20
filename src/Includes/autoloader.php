@@ -40,7 +40,8 @@ function myAutoLoader($className)
 
     foreach ($directorys as $directory) {
         foreach ($subdirectorys as $subdirectory) {
-            $path = $_SERVER["DOCUMENT_ROOT"] . $directory . $subdirectory . $className . '.php';
+            $src_directory = getcwd();
+            $path = $src_directory . $directory . $subdirectory . $className . '.php';
 
             //see if the file exsists
             if (file_exists($path)) {

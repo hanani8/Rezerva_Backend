@@ -19,11 +19,14 @@ header('Access-Control-Allow-Credentials:true');
 /**
  * Allow Requests from Specific Origins
  */
-header('Access-Control-Allow-Origin: http://localhost:5173');
+header('Access-Control-Allow-Methods: GET, POST, PUT, OPTIONS');
+
+header('Access-Control-Allow-Origin: http://localhost:4173');
 
 header('Vary: Origin');
 
-header('Access-Control-Allow-Methods: GET, POST, PUT, OPTIONS');
+header('Content-Type: application/json');
+
 
 
 // Routes
@@ -79,7 +82,7 @@ $router->addRoute(
     '/',
     function ($route, $parameters) {
 
-        return $_SERVER['HTTP_ORIGIN'];
+        return "API_OPERATIONAL";
     },
     'GET'
 );
@@ -286,7 +289,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
         /**
          * Only accept /login, /isloggedin requests when the user is not logged in, since the user needs these routes to authenticate himself.
          */
-        if ($_SERVER['REQUEST_URI'] == '/api/login' || $_SERVER['REQUEST_URI'] == '/api/isloggedin' || $_SERVER['REQUEST_URI'] == '/') {
+        if ($_SERVER['REQUEST_URI'] == '/api/login' || $_SERVER['REQUEST_URI'] == '/api/isloggedin' || $_SERVER['REQUEST_URI'] == '/api') {
             $result = $router->callRoute($_SERVER['REQUEST_URI']);
 
             echo json_encode($result);
