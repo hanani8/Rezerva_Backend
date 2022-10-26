@@ -21,7 +21,7 @@ header('Access-Control-Allow-Credentials:true');
  */
 header('Access-Control-Allow-Methods: GET, POST, PUT, OPTIONS');
 
-header('Access-Control-Allow-Origin: http://localhost:4173');
+header('Access-Control-Allow-Origin: http://localhost:5173');
 
 header('Vary: Origin');
 
@@ -79,10 +79,11 @@ $dashboardController;
  * / - GET
  */
 $router->addRoute(
-    '/',
+    '/api',
     function ($route, $parameters) {
 
-        return "API_OPERATIONAL";
+        http_response_code(200);
+        return new ReturnType(false, "API_OPERATIONAL");
     },
     'GET'
 );
@@ -132,6 +133,34 @@ $router->addRoute(
 );
 
 
+// /api/dashboard/[s:date] - GET
+
+$router->addRoute(
+    '/api/dashboard/[s:date]',
+    function ($route, $parameters) {
+        global $dashboardController;
+
+        $result = $dashboardController->getDashboardDataAction($route, $parameters);
+
+        return $result;
+    },
+    'GET'
+);
+
+// /api/reservations/[s:date] - GET
+
+$router->addRoute(
+    '/api/reservations/[s:date]',
+    function ($route, $parameters) {
+
+        global $reservationController;
+
+        $result = $reservationController->FetchWithDateReservationsAction($route, $parameters);
+
+        return $result;
+    },
+    'GET'
+);
 
 // /api/reservation - POST
 
@@ -145,22 +174,6 @@ $router->addRoute(
         return $result;
     },
     'POST'
-);
-
-
-// /api/reservation/[int:id] - GET
-
-$router->addRoute(
-    '/api/reservation/[i:reservation_id]',
-    function ($route, $parameters) {
-
-        global $reservationController;
-
-        $result = $reservationController->ReadReservationAction($route, $parameters);
-
-        return $result;
-    },
-    'GET'
 );
 
 // /api/reservation/[int:id]/edit - POST
@@ -194,37 +207,6 @@ $router->addRoute(
     'GET'
 );
 
-
-$router->addRoute(
-    '/api/reservations',
-    function ($route, $parameters) {
-
-        global $reservationController;
-
-        $result = $reservationController->FetchReservationsAction($route, $parameters);
-
-        return $result;
-    },
-    'GET'
-);
-
-// /api/reservation/[s:date] - GET
-
-$router->addRoute(
-    '/api/reservations/[s:date]',
-    function ($route, $parameters) {
-
-        global $reservationController;
-
-        $result = $reservationController->FetchWithDateReservationsAction($route, $parameters);
-
-        return $result;
-    },
-    'GET'
-);
-
-
-
 // /api/profile
 
 $router->addRoute(
@@ -240,14 +222,16 @@ $router->addRoute(
     'GET'
 );
 
-// /api/dashboard/[s:date] - GET
+
+// /api/reservation/[int:id] - GET
 
 $router->addRoute(
-    '/api/dashboard/[s:date]',
+    '/api/reservation/[i:reservation_id]',
     function ($route, $parameters) {
-        global $dashboardController;
 
-        $result = $dashboardController->getDashboardDataAction($route, $parameters);
+        global $reservationController;
+
+        $result = $reservationController->ReadReservationAction($route, $parameters);
 
         return $result;
     },
@@ -271,15 +255,32 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
         $reservationController = new ReservationController($db, $session);
         $dashboardController = new DashboardController($db, $session);
 
+        $result;
+
         /**
          * Calling the Routes
          */
-        $result = $router->callRoute($_SERVER['REQUEST_URI']);
+        try {
+            //code...
+    
+            $result = $router->callRoute($_SERVER['REQUEST_URI']);
+
+            
+        } catch (\Throwable $th) {
+            //throw $th;
+
+            http_response_code(404);
+
+            $result = new ReturnType(true, "ROUTE_NOT_FOUND");
+
+        }
 
         /**
-         * JSON Encoding
-         */
+            * JSON Encoding
+        */
+
         echo json_encode($result);
+
     } 
     /**
      * If the User is not logged in
@@ -298,8 +299,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
          * If Un-authenticated User is trying to access secure routes.
          */
         else {
-            $result = new ReturnType(false, "NOT_LOGGED_IN");
+            $result = new ReturnType(true, "NOT_LOGGED_IN");
 
+            http_response_code(401);
             echo json_encode($result);
         }
     }
