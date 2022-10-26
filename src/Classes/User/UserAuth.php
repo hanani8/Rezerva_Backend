@@ -39,8 +39,6 @@ class UserAuth implements UserAuthInterface
          */
         $resultOfDBOperation = $user_repository->read($user->user_id, $user->username);
 
-        $data = new stdClass();
-
         /**
          * PDO Statement returned by the Database
          */
@@ -62,7 +60,8 @@ class UserAuth implements UserAuthInterface
         if ($resultOfDBOperation->error == true) {
             $PDOStatement = null;
 
-            return new ReturnType(true, "STMT_FAILED", $data);
+            http_response_code(500);
+            return new ReturnType(true, "STMT_FAILED");
         }
 
         /**
@@ -71,7 +70,8 @@ class UserAuth implements UserAuthInterface
         if ($PDOStatement->rowCount() == 0) {
             $PDOStatement = null;
 
-            return new ReturnType(true, "USER_NOT_FOUND", $data);
+            http_response_code(404);
+            return new ReturnType(true, "USER_NOT_FOUND");
         }
 
         /**
@@ -85,13 +85,10 @@ class UserAuth implements UserAuthInterface
         if ($rowFromUsersTableInDB["password"] != $userProvidedPassword) {
             $PDOStatement = null;
 
-            return new ReturnType(true, "WRONG_PASSWORD", $data);
-
-        } 
-        elseif ($rowFromUsersTableInDB["password"] == $userProvidedPassword) {
+            http_response_code(404);
+            return new ReturnType(true, "WRONG_PASSWORD");
+        } elseif ($rowFromUsersTableInDB["password"] == $userProvidedPassword) {
             $PDOStatement = null;
-
-            $data->session_id = session_id();
 
             $this->session->user_id = $rowFromUsersTableInDB["user_id"];
 
@@ -99,11 +96,13 @@ class UserAuth implements UserAuthInterface
 
             $this->session->username = $rowFromUsersTableInDB["username"];
 
-            return new ReturnType(false, "LOGGED_IN", $data);
+            http_response_code(200);
+            return new ReturnType(false, "LOGGED_IN");
         } else {
             $PDOStatement = null;
 
-            return new ReturnType(true, "UNRECOGNIZED_ERROR", $data);
+            http_response_code(500);
+            return new ReturnType(true, "UNRECOGNIZED_ERROR");
         }
     }
 
@@ -117,8 +116,10 @@ class UserAuth implements UserAuthInterface
         $result = $this->session->is_logged_in();
 
         if ($result == true) {
+            http_response_code(200);
             return new ReturnType(false, "LOGGED_IN");
         } else {
+            http_response_code(200);
             return new ReturnType(false, "NOT_LOGGED_IN");
         }
     }
@@ -132,6 +133,7 @@ class UserAuth implements UserAuthInterface
     {
         $this->session->remove();
 
+        http_response_code(200);
         return new ReturnType(false, "LOGGED_OUT");
     }
 

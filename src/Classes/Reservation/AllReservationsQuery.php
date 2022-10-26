@@ -57,8 +57,10 @@ class AllReservationsQuery implements AllReservationsQueryInterface
 
             $data->reservations = $reservationRows;
 
+            http_response_code(200);
             return new ReturnType(false, "FETCH_RESERVATIONS_SUCCEEDED", $data);
         } else {
+            http_response_code(500);
             return new ReturnType(true, "FETCH_RESERVATIONS_FAILED", $data);
         }
     }
@@ -91,8 +93,10 @@ class AllReservationsQuery implements AllReservationsQueryInterface
 
             $data->reservations = $reservationRows;
 
+            http_response_code(200);
             return new ReturnType(false, "FETCH_WITH_DATE_RESERVATIONS_SUCCEEDED", $data);
         } else {
+            http_response_code(500);
             return new ReturnType(true, "FETCH_WITH_DATE_RESERVATIONS_FAILED", $data);
         }
     }

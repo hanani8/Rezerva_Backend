@@ -47,7 +47,7 @@ class ReservationRepository implements ReservationRepositoryInterface
      */
     public function create(Reservation $reservation): ReturnType
     {
-        $prepared_statement = 'INSERT INTO "Rezerva"."Reservation" (restaurant_id, guest_name, no_of_guests, phone, instructions, reservation_time,  status, created_by, type) VALUES (?,?,?,?,?,?,?,?,?) RETURNING *';
+        $prepared_statement = 'INSERT INTO "Rezerva"."Reservation" (restaurant_id, guest_name, no_of_guests, phone, instructions, reservation_time,  status, created_by, type) VALUES (?,?,?,?,?,?,?,?,?)';
 
         $values = array($this->restaurant_id, $reservation->guest_name, $reservation->no_of_guests, $reservation->phone, $reservation->instructions, $reservation->reservation_time, $reservation->status, $this->user_id, $reservation->type);
 
@@ -55,16 +55,18 @@ class ReservationRepository implements ReservationRepositoryInterface
 
         $PDOStatement = $resultFromDBOperation->data->statement;
 
-        $data = new stdClass();
+        // $data = new stdClass();
 
         if ($resultFromDBOperation->error == false) {
-            $row = $PDOStatement->fetch(PDO::FETCH_ASSOC);
+            // $row = $PDOStatement->fetch(PDO::FETCH_ASSOC);
 
-            $data->reservation = $row;
+            // $data->reservation = $row;
 
-            return new ReturnType(false, "CREATE_RESERVATION_SUCCEEDED", $data);
+            http_response_code(201);
+            return new ReturnType(false, "CREATE_RESERVATION_SUCCEEDED");
         } else {
-            return new ReturnType(true, "CREATE_RESERVATION_FAILED", $data);
+            http_response_code(500);
+            return new ReturnType(true, "CREATE_RESERVATION_FAILED");
         }
     }
 
@@ -89,14 +91,17 @@ class ReservationRepository implements ReservationRepositoryInterface
         $data = new stdClass();
 
         if ($PDOStatement->rowCount() == 0) {
+            http_response_code(404);
             return new ReturnType(true, "NO_RESERVATION_FOUND");
         } elseif ($resultFromDBOperation->error == false) {
             $row = $PDOStatement->fetch(PDO::FETCH_ASSOC);
 
             $data->reservation = $row;
 
+            http_response_code(200);
             return new ReturnType(false, "READ_RESERVATION_SUCCEEDED", $data);
         } else {
+            http_response_code(500);
             return new ReturnType(true, "READ_RESERVATION_FAILED", $data);
         }
     }
@@ -111,7 +116,7 @@ class ReservationRepository implements ReservationRepositoryInterface
     public function update(Reservation $reservation, int $reservation_id): ReturnType
     {
 
-        $prepared_statement = 'UPDATE "Rezerva"."Reservation" SET guest_name = ?, no_of_guests = ?, phone = ?, instructions = ?, status = ?, type = ?, reservation_time = ? WHERE reservation_id = ? AND restaurant_id = ? RETURNING *';
+        $prepared_statement = 'UPDATE "Rezerva"."Reservation" SET guest_name = ?, no_of_guests = ?, phone = ?, instructions = ?, status = ?, type = ?, reservation_time = ? WHERE reservation_id = ? AND restaurant_id = ?';
 
         $values = array($reservation->guest_name, $reservation->no_of_guests, $reservation->phone, $reservation->instructions, $reservation->status, $reservation->type, $reservation->reservation_time, $reservation_id, $this->restaurant_id);
 
@@ -122,13 +127,15 @@ class ReservationRepository implements ReservationRepositoryInterface
         $data = new stdClass();
 
         if ($resultFromDBOperation->error == false) {
-            $row = $PDOStatement->fetch(PDO::FETCH_ASSOC);
+            // $row = $PDOStatement->fetch(PDO::FETCH_ASSOC);
 
-            $data->reservation = $row;
+            // $data->reservation = $row;
 
-            return new ReturnType(false, "UPDATE_RESERVATION_SUCCEEDED", $data);
+            http_response_code(201);
+            return new ReturnType(false, "UPDATE_RESERVATION_SUCCEEDED");
         } else {
-            return new ReturnType(true, "UPDATE_RESERVATION_FAILED", $data);
+            http_response_code(500);
+            return new ReturnType(true, "UPDATE_RESERVATION_FAILED");
         }
     }
 }

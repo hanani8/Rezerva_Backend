@@ -39,11 +39,21 @@ class DashboardController
         /**
          * Checking if "date" is provided in the URL - Example: /api/reservations/"2022-10-08"
          */
-        if (array_key_exists("date", $parameters)) {
-            /**
-             * The Date in the URL
-             */
-            $date = $parameters["date"];
+        if (array_key_exists("date", $parameters) == false) {
+            http_response_code(400);
+            return new ReturnType(true, "DATE_NEEDED");
+        }
+        /**
+         * The Date in the URL
+         */
+        $date = $parameters["date"];
+
+        /**
+         * Regex pattern for "YYYY-MM-DD" date format
+         */
+        $pattern = "/\d{4}-\d{2}-\d{2}/";
+
+        if (preg_match_all($pattern, $date)) {
 
             /**
              * The counter for reservations
@@ -73,12 +83,15 @@ class DashboardController
                     }
                 }
 
+                http_response_code(200);
                 return new ReturnType(false, "READ_DASHBOARD_DATA_SUCCEEDED", $data);
             } else {
+                http_response_code(500);
                 return new ReturnType(true, "READ_DASHBOARD_DATA_FAILED", $data);
             }
         } else {
-            return new ReturnType(true, "INSUFFICIENT_DATA", $data);
+            http_response_code(400);
+            return new ReturnType(true, "WRONG_DATE_FORMAT");
         }
     }
 }

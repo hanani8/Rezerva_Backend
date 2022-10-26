@@ -57,6 +57,7 @@ class ReservationController extends UserController
          */
         foreach ($allNecessaryPostVariables as $variable) {
             if (array_key_exists($variable, $_POST) == false) {
+                http_response_code(400);
                 return new ReturnType(true, "INSUFFICIENT_DATA");
             }
         }
@@ -70,21 +71,52 @@ class ReservationController extends UserController
 
         $date = $_POST["date"];
 
+        $date_pattern = "/\d{4}-[0-1]{1}[0-9]{1}-[0-3]{1}[0-9]{1}/";
+
+        if (preg_match_all($date_pattern, $date) == false) {
+            http_response_code(400);
+            return new ReturnType(true, "WRONG_DATE_FORMAT");
+        }
+
         $time = $_POST["time"];
+
+        $time_pattern = "/[0-2]{1}[0-9]{1}:[0-9]{1}[0-9]{1}/";
+
+        if (preg_match_all($time_pattern, $time) == false) {
+            http_response_code(400);
+            return new ReturnType(true, "WRONG_TIME_FORMAT");
+        }
 
         $reservation_time = $date . " " . $time;
 
+        /**
+         * Today's Date
+         */
+
         $todaysDate = new DateTimeImmutable();
+
+        /**
+         * Today's Date in YYYY-MM-DD HH:MM format
+         */
 
         $todaysDateFormatted = $todaysDate->format('o-m-d G:i');
 
+        /**
+         * Confirming that the new reservation is not for past time.
+         */
+
         if ($reservation_time < $todaysDateFormatted) {
+
+            http_response_code(400);
             return new ReturnType(true, "CANNOT_CREATE_RESERVATION_FOR_PAST_TIME");
         }
 
         $status = intval($_POST["status"]);
 
+        // Need validation for reservation type. Allowed values: [1, 2]
+
         $type = intval($_POST["type"]);
+
 
         /**
          * Creating new Reservation Object
@@ -113,6 +145,7 @@ class ReservationController extends UserController
          * Check if reservation_id is present in the URL - Ex: api/reservation/12
          */
         if (array_key_exists("reservation_id", $parameters) == false) {
+            http_response_code(400);
             return new ReturnType(true, "INSUFFICIENT_DATA");
         }
 
@@ -129,6 +162,7 @@ class ReservationController extends UserController
          * Check if reservation_id is present in the URL
          */
         if (array_key_exists("reservation_id", $parameters) == false) {
+
             return new ReturnType(true, "INSUFFICIENT_DATA");
         }
 
@@ -151,6 +185,7 @@ class ReservationController extends UserController
          */
         foreach ($allNecessaryUpdateVariables as $variable) {
             if (array_key_exists($variable, $_POST) == false) {
+                http_response_code(400);
                 return new ReturnType(true, "INSUFFICIENT_DATA");
             }
         }
@@ -173,7 +208,21 @@ class ReservationController extends UserController
 
         $date = $_POST["date"];
 
+        $date_pattern = "/\d{4}-[0-1]{1}[0-9]{1}-[0-3]{1}[0-9]{1}/";
+
+        if (preg_match_all($date_pattern, $date) == false) {
+            http_response_code(400);
+            return new ReturnType(true, "WRONG_DATE_FORMAT");
+        }
+
         $time = $_POST["time"];
+
+        $time_pattern = "/[0-2]{1}[0-9]{1}:[0-9]{1}[0-9]{1}/";
+
+        if (preg_match_all($time_pattern, $time) == false) {
+            http_response_code(400);
+            return new ReturnType(true, "WRONG_TIME_FORMAT");
+        }
 
         $reservation_time = $date . " " . $time;
 
@@ -181,14 +230,25 @@ class ReservationController extends UserController
 
         if ($read_reservation->error == true) {
             return $read_reservation;
-        } else {
-            $todaysDate = new DateTimeImmutable();
+        }
 
-            $todaysDateFormatted = $todaysDate->format('o-m-d G:i');
+        if ($read_reservation->data->reservation["status"] == 2) {
+            http_response_code(400);
+            return new ReturnType(true, "CANNOT_UPDATE_ALREADY_CANCELLED_RESERVATION");
+        }
 
-            if ($read_reservation->data->reservation['reservation_time'] < $todaysDateFormatted) {
-                return new ReturnType(true, "CANNOT_UPDATE_PAST_RESERVATION");
-            }
+        $todaysDate = new DateTimeImmutable();
+
+        $todaysDateFormatted = $todaysDate->format('o-m-d G:i');
+
+        if ($read_reservation->data->reservation['reservation_time'] < $todaysDateFormatted) {
+            http_response_code(400);
+            return new ReturnType(true, "CANNOT_UPDATE_PAST_RESERVATION");
+        }
+
+        if ($reservation_time < $todaysDateFormatted) {
+            http_response_code(400);
+            return new ReturnType(true, "CANNOT_UPDATE_RESERVATION_TO_PAST_TIME");
         }
 
         $status = intval($_POST["status"]);
@@ -218,6 +278,7 @@ class ReservationController extends UserController
          * Checking if reservation_id is present in the URL
          */
         if (array_key_exists("reservation_id", $parameters) == false) {
+            http_response_code(400);
             return new ReturnType(true, "INSUFFICIENT_DATA");
         }
 
@@ -234,10 +295,6 @@ class ReservationController extends UserController
         if ($read_reservation->error == true) {
             return $read_reservation;
         } else {
-            /**
-             * Check if the reservation is already cancelled
-             */
-            if ($read_reservation->data->reservation["status"] != 2) {
                 $read_reservation->data->reservation["status"] = 2;
 
                 /**
@@ -247,19 +304,26 @@ class ReservationController extends UserController
                     ...$read_reservation->data->reservation
                 );
 
+                $todaysDate = new DateTimeImmutable();
+
+                $todaysDateFormatted = $todaysDate->format('o-m-d G:i');
+        
+                if ($read_reservation->data->reservation['reservation_time'] < $todaysDateFormatted) {
+                    http_response_code(400);
+                    return new ReturnType(true, "CANNOT_CANCEL_PAST_RESERVATION");
+                }
+
                 /**
                  * Update the reservation
                  */
                 $result = $this->reservationRepository->update($reservation, $reservation_id);
 
-                if ($result->message == "UPDATE_RESERVATION_SUCCEEDED") {
+                if ($result->error == false) {
+                    http_response_code(201);
                     return new ReturnType(false, "CANCEL_RESERVATION_SUCCEEDED");
                 } else {
-                    return new ReturnType(true, "CANCEL_RESERVATION_FAILED");
+                    return $result;
                 }
-            } else {
-                return new ReturnType(true, "CANCEL_RESERVATION_FAILED");
-            }
         }
     }
 
@@ -276,13 +340,21 @@ class ReservationController extends UserController
          * Check if the "date" is present in the URL
          */
         if (array_key_exists("date", $parameters) == false) {
+            http_response_code(400);
             return new ReturnType(true, "DATE_NEEDED");
         }
 
         $date = $parameters["date"];
 
-        $result = $this->allReservationsQuery->fetchWithDate($date);
+        $pattern = "/\d{4}-\d{2}-\d{2}/";
 
-        return $result;
+        if (preg_match_all($pattern, $date)) {
+            $result = $this->allReservationsQuery->fetchWithDate($date);
+
+            return $result;
+        } else {
+            http_response_code(400);
+            return new ReturnType(true, "WRONG_DATE_FORMAT");
+        }
     }
 }

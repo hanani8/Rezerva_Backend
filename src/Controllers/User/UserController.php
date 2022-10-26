@@ -50,6 +50,7 @@ class UserController
          */
         if((empty($userid) && empty($username)) || empty($password))
         {
+            http_response_code(400);
             return new ReturnType(true, "INSUFFICIENT_DETAILS_FOR_LOGIN");
         }
 
