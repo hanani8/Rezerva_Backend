@@ -42,4 +42,13 @@ interface ReservationRepositoryInterface
      * @return ReturnType
      */
     public function update(Reservation $reservation, int $reservation_id):ReturnType;
+
+    /**
+     * Updates only specific cols of a Reservation from DB
+     * 
+     * @param Array $names
+     * @param Array $values
+     */
+
+     public function newUpdate(array $names, array $values, int $reservation_id): ReturnType;
 }

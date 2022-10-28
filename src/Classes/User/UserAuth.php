@@ -90,6 +90,10 @@ class UserAuth implements UserAuthInterface
         } elseif ($rowFromUsersTableInDB["password"] == $userProvidedPassword) {
             $PDOStatement = null;
 
+            $data = new stdClass();
+
+            $data->session_id = session_id();
+
             $this->session->user_id = $rowFromUsersTableInDB["user_id"];
 
             $this->session->restaurant_id = $rowFromUsersTableInDB["restaurant_id"];
@@ -97,7 +101,7 @@ class UserAuth implements UserAuthInterface
             $this->session->username = $rowFromUsersTableInDB["username"];
 
             http_response_code(200);
-            return new ReturnType(false, "LOGGED_IN");
+            return new ReturnType(false, "LOGGED_IN", $data);
         } else {
             $PDOStatement = null;
 

@@ -47,7 +47,7 @@ class ReservationRepository implements ReservationRepositoryInterface
      */
     public function create(Reservation $reservation): ReturnType
     {
-        $prepared_statement = 'INSERT INTO "Rezerva"."Reservation" (restaurant_id, guest_name, no_of_guests, phone, instructions, reservation_time,  status, created_by, type) VALUES (?,?,?,?,?,?,?,?,?)';
+        $prepared_statement = 'INSERT INTO "Rezerva"."Reservation" (restaurant_id, guest_name, no_of_guests, phone, instructions, reservation_time,  status, created_by, type) VALUES (?,?,?,?,?,?,?,?,?) RETURNING reservation_id';
 
         $values = array($this->restaurant_id, $reservation->guest_name, $reservation->no_of_guests, $reservation->phone, $reservation->instructions, $reservation->reservation_time, $reservation->status, $this->user_id, $reservation->type);
 
@@ -55,15 +55,15 @@ class ReservationRepository implements ReservationRepositoryInterface
 
         $PDOStatement = $resultFromDBOperation->data->statement;
 
-        // $data = new stdClass();
+        $data = new stdClass();
 
         if ($resultFromDBOperation->error == false) {
-            // $row = $PDOStatement->fetch(PDO::FETCH_ASSOC);
+            $row = $PDOStatement->fetch(PDO::FETCH_ASSOC);
 
-            // $data->reservation = $row;
+            $data->reservation_id = $row['reservation_id'];
 
             http_response_code(201);
-            return new ReturnType(false, "CREATE_RESERVATION_SUCCEEDED");
+            return new ReturnType(false, "CREATE_RESERVATION_SUCCEEDED", $data);
         } else {
             http_response_code(500);
             return new ReturnType(true, "CREATE_RESERVATION_FAILED");
@@ -136,6 +136,45 @@ class ReservationRepository implements ReservationRepositoryInterface
         } else {
             http_response_code(500);
             return new ReturnType(true, "UPDATE_RESERVATION_FAILED");
+        }
+    }
+
+    /**
+     * Updates only specific cols of a Reservation from DB
+     * 
+     * @param Array $names
+     * @param Array $values
+     */
+
+    public function newUpdate(array $names, array $values, int $reservation_id): ReturnType
+    {
+        $prepared_statement = 'UPDATE "Rezerva"."Reservation" SET ';
+
+        foreach($names as $name)
+        {
+            $prepared_statement .= $name . ' = ?,';
+        }
+
+        $prepared_statement = substr ($prepared_statement, 0, -1);
+
+        $prepared_statement .= ' WHERE reservation_id = ? AND restaurant_id = ?';
+
+        array_push($values, $reservation_id);
+
+        array_push($values, $this->restaurant_id);
+
+        $resultFromDBOperation = $this->db->query($prepared_statement, $values);
+
+        if ($resultFromDBOperation->error == false) {
+            // $row = $PDOStatement->fetch(PDO::FETCH_ASSOC);
+
+            // $data->reservation = $row;
+
+            http_response_code(201);
+            return new ReturnType(false, "NEW_UPDATE_RESERVATION_SUCCEEDED");
+        } else {
+            http_response_code(500);
+            return new ReturnType(true, "NEW_UPDATE_RESERVATION_FAILED");
         }
     }
 }

@@ -327,6 +327,146 @@ class ReservationController extends UserController
         }
     }
 
+    public function newUpdateReservationAction($route, $parameters)
+    {
+        /**
+         * Check if reservation_id is present in the URL
+         */
+        if (array_key_exists("reservation_id", $parameters) == false) {
+
+            return new ReturnType(true, "INSUFFICIENT_DATA");
+        }
+
+        /**
+         * Get Reservation ID from URL
+         */
+
+        $reservation_id = intval($parameters["reservation_id"]);
+
+        /**
+         *  Get PUT data into $_PUT array
+         */
+
+        $json = file_get_contents("php://input");
+
+        $_PUT = json_decode($json, true);
+
+        /**
+         * Name of the cols in reservation table that needs to be updated
+         */
+
+        $names = array();
+
+        /**
+         * Value of the cols in the reservation table that the col need to be updated to
+         */
+
+        $values = array();
+
+
+        /**
+         * Read the reservation
+         */
+
+        $read_reservation = $this->reservationRepository->read($reservation_id);
+
+        if ($read_reservation->error == true) {
+            return $read_reservation;
+        }
+
+        /**
+         * If the reservation is already cancelled, cannot update it.
+         */
+
+        if ($read_reservation->data->reservation["status"] == 2) {
+            http_response_code(400);
+            return new ReturnType(true, "CANNOT_UPDATE_ALREADY_CANCELLED_RESERVATION");
+        }
+
+        $todaysDate = new DateTimeImmutable();
+
+        $todaysDateFormatted = $todaysDate->format('o-m-d G:i');
+
+        /**
+         * Cannot update a past reservation
+         */
+
+        if ($read_reservation->data->reservation['reservation_time'] < $todaysDateFormatted) {
+            http_response_code(400);
+            return new ReturnType(true, "CANNOT_UPDATE_PAST_RESERVATION");
+                        }
+
+        foreach ($_PUT as $key => $value) {
+            switch($key) {
+                case "guest_name":
+                    array_push($names, $key);
+                    array_push($values, $value);
+                    break;
+                
+                case "no_of_guests":
+                    array_push($names, $key);
+                    $no_of_guests = intval($value);
+                    array_push($values, $no_of_guests);
+                    break;
+                
+                case "phone":
+                    array_push($names, $key);
+                    array_push($values, $value);
+                    break;
+
+                case "instructions":
+                    array_push($names, $key);
+                    array_push($values, $value);
+                    break;
+
+                case "reservation_time":
+                    $reservation_time = $value;
+
+                     if($this->reservationTimeValidation($reservation_time) == true)
+                     {
+                
+                        /**
+                         * Cannot update the reservation to past time
+                         */
+                
+                        if ($_PUT["reservation_time"] < $todaysDateFormatted) {
+                            http_response_code(400);
+                            return new ReturnType(true, "CANNOT_UPDATE_RESERVATION_TO_PAST_TIME");
+                        }
+
+                        array_push($names, $key);
+                        
+                        array_push($values, $value);
+                        
+                        break;
+                     } else 
+                     {
+                        http_response_code(400);
+                        return new ReturnType(true, "WRONG_RESERVATION_TIME_FORMAT");
+                     }
+
+                case "status":
+                    $names = array();
+                    $values = array();
+                    array_push($names, $key);
+                    $status = intval($value);
+                    array_push($values, 2);
+                    break 2;
+
+                case "type":
+                    array_push($names, $key);
+                    $reservation_type = intval($value);
+                    array_push($values, $reservation_type);
+                    break;
+            }
+        }
+
+        $result = $this->reservationRepository->newUpdate($names, $values, $reservation_id);
+
+        return $result;
+    }
+
+
     public function FetchReservationsAction($route, $parameters)
     {
         $result = $this->allReservationsQuery->fetch();
@@ -357,4 +497,16 @@ class ReservationController extends UserController
             return new ReturnType(true, "WRONG_DATE_FORMAT");
         }
     }
+
+    private function reservationTimeValidation(string $reservation_time)
+    {
+        $pattern = "/\d{4}-[0-1]{1}[0-9]{1}-[0-3]{1}[0-9]{1} [0-2]{1}[0-9]{1}:[0-9]{1}[0-9]{1}/";
+
+        if (preg_match_all($pattern, $reservation_time) == false) {
+            return false;
+        }
+
+        return true;
+    }
+
 }

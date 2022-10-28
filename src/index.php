@@ -19,7 +19,7 @@ header('Access-Control-Allow-Credentials:true');
 /**
  * Allow Requests from Specific Origins
  */
-header('Access-Control-Allow-Methods: GET, POST, PUT, OPTIONS');
+header('Access-Control-Allow-Methods: GET, POST, PUT, OPTIONS, PATCH');
 
 header('Access-Control-Allow-Origin: http://localhost:5173');
 
@@ -76,7 +76,7 @@ $reservationController;
 $dashboardController;
 
 /**
- * / - GET
+ * /api - GET
  */
 $router->addRoute(
     '/api',
@@ -207,6 +207,23 @@ $router->addRoute(
     'GET'
 );
 
+// /api/reservation/[int:id] - PATCH
+
+$router->addRoute(
+    '/api/reservation/[i:reservation_id]',
+    function ($route, $parameters) {
+
+
+        global $reservationController;
+
+        $result = $reservationController->newUpdateReservationAction($route, $parameters);
+
+        return $result;
+
+    },
+    'PATCH'
+);
+
 // /api/profile
 
 $router->addRoute(
@@ -262,26 +279,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
          */
         try {
             //code...
-    
-            $result = $router->callRoute($_SERVER['REQUEST_URI']);
 
-            
+            $result = $router->callRoute($_SERVER['REQUEST_URI']);
         } catch (\Throwable $th) {
             //throw $th;
 
             http_response_code(404);
 
             $result = new ReturnType(true, "ROUTE_NOT_FOUND");
-
         }
 
         /**
-            * JSON Encoding
-        */
+         * JSON Encoding
+         */
 
         echo json_encode($result);
-
-    } 
+    }
     /**
      * If the User is not logged in
      */
@@ -294,7 +307,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
             $result = $router->callRoute($_SERVER['REQUEST_URI']);
 
             echo json_encode($result);
-        } 
+        }
         /**
          * If Un-authenticated User is trying to access secure routes.
          */
