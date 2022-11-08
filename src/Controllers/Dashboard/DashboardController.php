@@ -65,6 +65,11 @@ class DashboardController
              */
             $data->walkIns = 0;
 
+            /**
+             * The counter for waitlists
+             */
+            $data->waitlists = 0;
+
             $result = $this->allReservationsQuery->fetchWithDate($date);
 
             if ($result->error == false) {
@@ -80,6 +85,14 @@ class DashboardController
                          */
                     } elseif ($result->data->reservations[$i]["type"] == '2') {
                         $data->walkIns += 1;
+                    }
+
+                    /**
+                     * Checking for waitlised reservations/walkins
+                     */
+                    if($result->data->reservations[$i]["status"] == '1')
+                    {
+                        $data->waitlists += 1;
                     }
                 }
 
