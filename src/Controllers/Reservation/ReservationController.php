@@ -48,7 +48,8 @@ class ReservationController extends UserController
             "date",
             "time",
             "status",
-            "type"
+            "type",
+            "table"
         ];
 
         /**
@@ -117,6 +118,12 @@ class ReservationController extends UserController
 
         $type = intval($_POST["type"]);
 
+        /**
+         * Table No
+         */
+
+        $table = $_POST["table"];
+
 
         /**
          * Creating new Reservation Object
@@ -128,7 +135,8 @@ class ReservationController extends UserController
             $instructions,
             $reservation_time,
             $status,
-            $type
+            $type,
+            $table
         );
 
         /**
@@ -156,121 +164,121 @@ class ReservationController extends UserController
         return $result;
     }
 
-    public function UpdateReservationAction($route, $parameters)
-    {
-        /**
-         * Check if reservation_id is present in the URL
-         */
-        if (array_key_exists("reservation_id", $parameters) == false) {
+    // public function UpdateReservationAction($route, $parameters)
+    // {
+    //     /**
+    //      * Check if reservation_id is present in the URL
+    //      */
+    //     if (array_key_exists("reservation_id", $parameters) == false) {
 
-            return new ReturnType(true, "INSUFFICIENT_DATA");
-        }
+    //         return new ReturnType(true, "INSUFFICIENT_DATA");
+    //     }
 
-        /**
-         * All the necessary data for successful reservation updation
-         */
-        $allNecessaryUpdateVariables = [
-            "guest_name",
-            "no_of_guests",
-            "phone",
-            "instructions",
-            "date",
-            "time",
-            "status",
-            "type"
-        ];
+    //     /**
+    //      * All the necessary data for successful reservation updation
+    //      */
+    //     $allNecessaryUpdateVariables = [
+    //         "guest_name",
+    //         "no_of_guests",
+    //         "phone",
+    //         "instructions",
+    //         "date",
+    //         "time",
+    //         "status",
+    //         "type"
+    //     ];
 
-        /**
-         * Check if all the necessary variables are present in the $_POST array
-         */
-        foreach ($allNecessaryUpdateVariables as $variable) {
-            if (array_key_exists($variable, $_POST) == false) {
-                http_response_code(400);
-                return new ReturnType(true, "INSUFFICIENT_DATA");
-            }
-        }
+    //     /**
+    //      * Check if all the necessary variables are present in the $_POST array
+    //      */
+    //     foreach ($allNecessaryUpdateVariables as $variable) {
+    //         if (array_key_exists($variable, $_POST) == false) {
+    //             http_response_code(400);
+    //             return new ReturnType(true, "INSUFFICIENT_DATA");
+    //         }
+    //     }
 
-        $reservation_id = intval($parameters["reservation_id"]);
+    //     $reservation_id = intval($parameters["reservation_id"]);
 
-        // PHP has no straight-forward $_PUT support.
+    //     // PHP has no straight-forward $_PUT support.
 
-        // https://stackoverflow.com/a/41959141/11887766
+    //     // https://stackoverflow.com/a/41959141/11887766
 
-        // parse_str(file_get_contents('php://input'), $_PUT);
+    //     // parse_str(file_get_contents('php://input'), $_PUT);
 
-        $guest_name = $_POST["guest_name"];
+    //     $guest_name = $_POST["guest_name"];
 
-        $no_of_guests = intval($_POST["no_of_guests"]);
+    //     $no_of_guests = intval($_POST["no_of_guests"]);
 
-        $phone = $_POST["phone"];
+    //     $phone = $_POST["phone"];
 
-        $instructions = $_POST["instructions"];
+    //     $instructions = $_POST["instructions"];
 
-        $date = $_POST["date"];
+    //     $date = $_POST["date"];
 
-        $date_pattern = "/\d{4}-[0-1]{1}[0-9]{1}-[0-3]{1}[0-9]{1}/";
+    //     $date_pattern = "/\d{4}-[0-1]{1}[0-9]{1}-[0-3]{1}[0-9]{1}/";
 
-        if (preg_match_all($date_pattern, $date) == false) {
-            http_response_code(400);
-            return new ReturnType(true, "WRONG_DATE_FORMAT");
-        }
+    //     if (preg_match_all($date_pattern, $date) == false) {
+    //         http_response_code(400);
+    //         return new ReturnType(true, "WRONG_DATE_FORMAT");
+    //     }
 
-        $time = $_POST["time"];
+    //     $time = $_POST["time"];
 
-        $time_pattern = "/[0-2]{1}[0-9]{1}:[0-9]{1}[0-9]{1}/";
+    //     $time_pattern = "/[0-2]{1}[0-9]{1}:[0-9]{1}[0-9]{1}/";
 
-        if (preg_match_all($time_pattern, $time) == false) {
-            http_response_code(400);
-            return new ReturnType(true, "WRONG_TIME_FORMAT");
-        }
+    //     if (preg_match_all($time_pattern, $time) == false) {
+    //         http_response_code(400);
+    //         return new ReturnType(true, "WRONG_TIME_FORMAT");
+    //     }
 
-        $reservation_time = $date . " " . $time;
+    //     $reservation_time = $date . " " . $time;
 
-        $read_reservation = $this->reservationRepository->read($reservation_id);
+    //     $read_reservation = $this->reservationRepository->read($reservation_id);
 
-        if ($read_reservation->error == true) {
-            return $read_reservation;
-        }
+    //     if ($read_reservation->error == true) {
+    //         return $read_reservation;
+    //     }
 
-        if ($read_reservation->data->reservation["status"] == 2) {
-            http_response_code(400);
-            return new ReturnType(true, "CANNOT_UPDATE_ALREADY_CANCELLED_RESERVATION");
-        }
+    //     if ($read_reservation->data->reservation["status"] == 2) {
+    //         http_response_code(400);
+    //         return new ReturnType(true, "CANNOT_UPDATE_ALREADY_CANCELLED_RESERVATION");
+    //     }
 
-        $todaysDate = new DateTimeImmutable();
+    //     $todaysDate = new DateTimeImmutable();
 
-        $todaysDateFormatted = $todaysDate->format('o-m-d G:i');
+    //     $todaysDateFormatted = $todaysDate->format('o-m-d G:i');
 
-        if ($read_reservation->data->reservation['reservation_time'] < $todaysDateFormatted) {
-            http_response_code(400);
-            return new ReturnType(true, "CANNOT_UPDATE_PAST_RESERVATION");
-        }
+    //     if ($read_reservation->data->reservation['reservation_time'] < $todaysDateFormatted) {
+    //         http_response_code(400);
+    //         return new ReturnType(true, "CANNOT_UPDATE_PAST_RESERVATION");
+    //     }
 
-        if ($reservation_time < $todaysDateFormatted) {
-            http_response_code(400);
-            return new ReturnType(true, "CANNOT_UPDATE_RESERVATION_TO_PAST_TIME");
-        }
+    //     if ($reservation_time < $todaysDateFormatted) {
+    //         http_response_code(400);
+    //         return new ReturnType(true, "CANNOT_UPDATE_RESERVATION_TO_PAST_TIME");
+    //     }
 
-        $status = intval($_POST["status"]);
+    //     $status = intval($_POST["status"]);
 
-        $type = intval($_POST["type"]);
+    //     $type = intval($_POST["type"]);
 
-        // Create a seperate API for each status change.
+    //     // Create a seperate API for each status change.
 
-        $reservation = new Reservation(
-            $guest_name,
-            $no_of_guests,
-            $phone,
-            $instructions,
-            $reservation_time,
-            $status,
-            $type
-        );
+    //     $reservation = new Reservation(
+    //         $guest_name,
+    //         $no_of_guests,
+    //         $phone,
+    //         $instructions,
+    //         $reservation_time,
+    //         $status,
+    //         $type
+    //     );
 
-        $result = $this->reservationRepository->update($reservation, $reservation_id);
+    //     $result = $this->reservationRepository->update($reservation, $reservation_id);
 
-        return $result;
-    }
+    //     return $result;
+    // }
 
     public function CancelReservationAction($route, $parameters)
     {
@@ -457,6 +465,11 @@ class ReservationController extends UserController
                     array_push($names, $key);
                     $reservation_type = intval($value);
                     array_push($values, $reservation_type);
+                    break;
+
+                case "table":
+                    array_push($names, $key);
+                    array_push($values, $value);
                     break;
             }
         }

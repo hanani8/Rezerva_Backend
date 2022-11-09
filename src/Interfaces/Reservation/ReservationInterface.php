@@ -16,6 +16,7 @@ interface ReservationInterface
         string $reservation_time,
         int $status,
         int $type,
+        string $table,
         int $reservation_id = 0,
         int $created_by = 0,
         string $created_at = ""

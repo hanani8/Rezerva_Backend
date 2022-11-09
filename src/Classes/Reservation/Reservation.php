@@ -14,6 +14,7 @@ class Reservation implements ReservationInterface
     private int $created_by;
     private string $created_at;
     private int $type;
+    private string $table;
 
     public function __construct(
         string $guest_name,
@@ -23,9 +24,10 @@ class Reservation implements ReservationInterface
         string $reservation_time,
         int $status,
         int $type,
+        string $table,
         int $reservation_id = 0,
         int $created_by = 0,
-        string $created_at = ""
+        string $created_at = "",
     ) {
         $this->guest_name = $guest_name;
         $this->no_of_guests = $no_of_guests;
@@ -37,6 +39,7 @@ class Reservation implements ReservationInterface
         $this->reservation_id = $reservation_id;
         $this->created_by = $created_by;
         $this->created_at = $created_at;
+        $this->table = $table;
     }
 
     public function __get($name)

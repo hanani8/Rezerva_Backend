@@ -47,9 +47,9 @@ class ReservationRepository implements ReservationRepositoryInterface
      */
     public function create(Reservation $reservation): ReturnType
     {
-        $prepared_statement = 'INSERT INTO "Rezerva"."Reservation" (restaurant_id, guest_name, no_of_guests, phone, instructions, reservation_time,  status, created_by, type) VALUES (?,?,?,?,?,?,?,?,?) RETURNING reservation_id';
+        $prepared_statement = 'INSERT INTO "Rezerva"."Reservation" (restaurant_id, guest_name, no_of_guests, phone, instructions, reservation_time,  status, created_by, type, "table") VALUES (?,?,?,?,?,?,?,?,?,?) RETURNING reservation_id';
 
-        $values = array($this->restaurant_id, $reservation->guest_name, $reservation->no_of_guests, $reservation->phone, $reservation->instructions, $reservation->reservation_time, $reservation->status, $this->user_id, $reservation->type);
+        $values = array($this->restaurant_id, $reservation->guest_name, $reservation->no_of_guests, $reservation->phone, $reservation->instructions, $reservation->reservation_time, $reservation->status, $this->user_id, $reservation->type, $reservation->table);
 
         $resultFromDBOperation = $this->db->query($prepared_statement, $values);
 
@@ -79,7 +79,7 @@ class ReservationRepository implements ReservationRepositoryInterface
     public function read(int $reservation_id): ReturnType
     {
 
-        $prepared_statement = 'SELECT reservation_id, guest_name, no_of_guests, phone, instructions, status, created_by, created_at, type, reservation_time FROM "Rezerva"."Reservation" WHERE reservation_id = ? AND restaurant_id = ?';
+        $prepared_statement = 'SELECT reservation_id, guest_name, no_of_guests, phone, instructions, status, created_by, created_at, type, reservation_time, "table" FROM "Rezerva"."Reservation" WHERE reservation_id = ? AND restaurant_id = ?';
 
         $values = array($reservation_id, $this->restaurant_id);
 
@@ -152,7 +152,7 @@ class ReservationRepository implements ReservationRepositoryInterface
 
         foreach($names as $name)
         {
-            $prepared_statement .= $name . ' = ?,';
+            $prepared_statement .= '"'.$name.'"' . ' = ?,';
         }
 
         $prepared_statement = substr ($prepared_statement, 0, -1);

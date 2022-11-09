@@ -73,7 +73,7 @@ class AllReservationsQuery implements AllReservationsQueryInterface
 
         $datePlusOneMoreDayString = $datePlusOneMoreDay->format('Y-m-d');
 
-        $prepared_statement = 'SELECT reservation_id, guest_name, no_of_guests, phone, instructions, status, created_by, created_at, reservation_time, type  FROM "Rezerva"."Reservation" WHERE restaurant_id = ? AND reservation_time >= ? AND reservation_time < ? ORDER BY created_at DESC';
+        $prepared_statement = 'SELECT reservation_id, guest_name, no_of_guests, phone, instructions, status, created_by, created_at, reservation_time, type, "table"  FROM "Rezerva"."Reservation" WHERE restaurant_id = ? AND reservation_time >= ? AND reservation_time < ? ORDER BY created_at DESC';
 
         $values = array($this->restaurant_id, $date, $datePlusOneMoreDayString);
 
