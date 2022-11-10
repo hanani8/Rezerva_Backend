@@ -65,17 +65,33 @@ class AllReservationsQuery implements AllReservationsQueryInterface
         }
     }
 
-    public function fetchWithDate(string $date): ReturnType
+    public function fetchWithDateLimitOffset(string $date, int $limit, int $offset): ReturnType
     {
+        /**
+         * Converting limit = 0 to limit = ALL
+         */
+
         $datePlusOneMoreDay = new DateTime($date);
 
         $datePlusOneMoreDay->modify('+1 day');
 
         $datePlusOneMoreDayString = $datePlusOneMoreDay->format('Y-m-d');
 
-        $prepared_statement = 'SELECT reservation_id, guest_name, no_of_guests, phone, instructions, status, created_by, created_at, reservation_time, type, "table"  FROM "Rezerva"."Reservation" WHERE restaurant_id = ? AND reservation_time >= ? AND reservation_time < ? ORDER BY created_at DESC';
+        $prepared_statement = "";
 
-        $values = array($this->restaurant_id, $date, $datePlusOneMoreDayString);
+        $values = array();
+
+        if ($limit == 0) {
+            $prepared_statement = 'SELECT reservation_id, guest_name, no_of_guests, phone, instructions, status, created_by, created_at, reservation_time, type, "table"  FROM "Rezerva"."Reservation" WHERE restaurant_id = ? AND reservation_time >= ? AND reservation_time < ? ORDER BY created_at DESC LIMIT ALL OFFSET ?';
+
+            $values = array($this->restaurant_id, $date, $datePlusOneMoreDayString, $offset);
+        } else {
+            $prepared_statement = 'SELECT reservation_id, guest_name, no_of_guests, phone, instructions, status, created_by, created_at, reservation_time, type, "table"  FROM "Rezerva"."Reservation" WHERE restaurant_id = ? AND reservation_time >= ? AND reservation_time < ? ORDER BY created_at DESC LIMIT ? OFFSET ?';
+
+            $values = array($this->restaurant_id, $date, $datePlusOneMoreDayString, $limit, $offset);
+        }
+
+
 
         $resultFromDBOperation = $this->db->query($prepared_statement, $values);
 

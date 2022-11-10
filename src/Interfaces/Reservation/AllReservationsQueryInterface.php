@@ -31,5 +31,5 @@ interface AllReservationsQueryInterface
      * @param string $date
      * @return ReturnType
      */
-    public function fetchWithDate(string $date): ReturnType;
+    public function fetchWithDateLimitOffset(string $date, int $limit, int $offset): ReturnType;
 }
