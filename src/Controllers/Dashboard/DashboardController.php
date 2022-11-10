@@ -70,7 +70,7 @@ class DashboardController
              */
             $data->waitlists = 0;
 
-            $result = $this->allReservationsQuery->fetchWithDate($date);
+            $result = $this->allReservationsQuery->fetchWithDateLimitOffset($date, 0, 0);
 
             if ($result->error == false) {
 
