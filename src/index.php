@@ -149,8 +149,23 @@ $router->addRoute(
 
 // /api/reservations/[s:date] - GET
 
+// $router->addRoute(
+//     '/api/reservations/[s:date]',
+//     function ($route, $parameters) {
+
+//         global $reservationController;
+
+//         $result = $reservationController->FetchWithDateReservationsAction($route, $parameters);
+
+//         return $result;
+//     },
+//     'GET'
+// );
+
+// /api/reservations/[s:date]/[s:limit_offset] - GET
+
 $router->addRoute(
-    '/api/reservations/[s:date]',
+    '/api/reservations/[s:date]/[s:limit_offset]',
     function ($route, $parameters) {
 
         global $reservationController;
@@ -178,18 +193,18 @@ $router->addRoute(
 
 // /api/reservation/[int:id]/edit - POST
 
-$router->addRoute(
-    '/api/reservation/[i:reservation_id]/edit',
-    function ($route, $parameters) {
+// $router->addRoute(
+//     '/api/reservation/[i:reservation_id]/edit',
+//     function ($route, $parameters) {
 
-        global $reservationController;
+//         global $reservationController;
 
-        $result = $reservationController->UpdateReservationAction($route, $parameters);
+//         $result = $reservationController->UpdateReservationAction($route, $parameters);
 
-        return $result;
-    },
-    'POST'
-);
+//         return $result;
+//     },
+//     'POST'
+// );
 
 // /api/reservation/[int:id]/cancel - GET
 
