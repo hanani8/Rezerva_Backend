@@ -303,35 +303,35 @@ class ReservationController extends UserController
         if ($read_reservation->error == true) {
             return $read_reservation;
         } else {
-                $read_reservation->data->reservation["status"] = 2;
+            $read_reservation->data->reservation["status"] = 2;
 
-                /**
-                 * From the data from previous reservation_read, create a new reservation object.
-                 */
-                $reservation = new Reservation(
-                    ...$read_reservation->data->reservation
-                );
+            /**
+             * From the data from previous reservation_read, create a new reservation object.
+             */
+            $reservation = new Reservation(
+                ...$read_reservation->data->reservation
+            );
 
-                $todaysDate = new DateTimeImmutable();
+            $todaysDate = new DateTimeImmutable();
 
-                $todaysDateFormatted = $todaysDate->format('o-m-d G:i');
-        
-                if ($read_reservation->data->reservation['reservation_time'] < $todaysDateFormatted) {
-                    http_response_code(400);
-                    return new ReturnType(true, "CANNOT_CANCEL_PAST_RESERVATION");
-                }
+            $todaysDateFormatted = $todaysDate->format('o-m-d G:i');
 
-                /**
-                 * Update the reservation
-                 */
-                $result = $this->reservationRepository->update($reservation, $reservation_id);
+            if ($read_reservation->data->reservation['reservation_time'] < $todaysDateFormatted) {
+                http_response_code(400);
+                return new ReturnType(true, "CANNOT_CANCEL_PAST_RESERVATION");
+            }
 
-                if ($result->error == false) {
-                    http_response_code(201);
-                    return new ReturnType(false, "CANCEL_RESERVATION_SUCCEEDED");
-                } else {
-                    return $result;
-                }
+            /**
+             * Update the reservation
+             */
+            $result = $this->reservationRepository->update($reservation, $reservation_id);
+
+            if ($result->error == false) {
+                http_response_code(201);
+                return new ReturnType(false, "CANCEL_RESERVATION_SUCCEEDED");
+            } else {
+                return $result;
+            }
         }
     }
 
@@ -402,21 +402,21 @@ class ReservationController extends UserController
         if ($read_reservation->data->reservation['reservation_time'] < $todaysDateFormatted) {
             http_response_code(400);
             return new ReturnType(true, "CANNOT_UPDATE_PAST_RESERVATION");
-                        }
+        }
 
         foreach ($_PUT as $key => $value) {
-            switch($key) {
+            switch ($key) {
                 case "guest_name":
                     array_push($names, $key);
                     array_push($values, $value);
                     break;
-                
+
                 case "no_of_guests":
                     array_push($names, $key);
                     $no_of_guests = intval($value);
                     array_push($values, $no_of_guests);
                     break;
-                
+
                 case "phone":
                     array_push($names, $key);
                     array_push($values, $value);
@@ -430,28 +430,26 @@ class ReservationController extends UserController
                 case "reservation_time":
                     $reservation_time = $value;
 
-                     if($this->reservationTimeValidation($reservation_time) == true)
-                     {
-                
+                    if ($this->reservationTimeValidation($reservation_time) == true) {
+
                         /**
                          * Cannot update the reservation to past time
                          */
-                
+
                         if ($_PUT["reservation_time"] < $todaysDateFormatted) {
                             http_response_code(400);
                             return new ReturnType(true, "CANNOT_UPDATE_RESERVATION_TO_PAST_TIME");
                         }
 
                         array_push($names, $key);
-                        
+
                         array_push($values, $value);
-                        
+
                         break;
-                     } else 
-                     {
+                    } else {
                         http_response_code(400);
                         return new ReturnType(true, "WRONG_RESERVATION_TIME_FORMAT");
-                     }
+                    }
 
                 case "status":
                     $names = array();
@@ -497,12 +495,44 @@ class ReservationController extends UserController
             return new ReturnType(true, "DATE_NEEDED");
         }
 
+        $limit_offset_present = false;
+
+        $limit_offset = "";
+
+        /**
+         * Check if Offset and Limit is present in the URL
+         */
+        if (array_key_exists("limit_offset", $parameters) == true) {
+
+            $limit_offset_present = true;
+
+            $limit_offset = $parameters["limit_offset"];
+        }
+
         $date = $parameters["date"];
+
 
         $pattern = "/\d{4}-\d{2}-\d{2}/";
 
+        $limit_offset_pattern = "/\?limit=\d*&offset=\d*/";
+
+        // return $limit_offset;
+
+        if ($limit_offset_present && preg_match_all($limit_offset_pattern, $limit_offset) == false) {
+            http_response_code(400);
+            return new ReturnType(true, "WRONG_LIMIT_OFFSET_PATTERN");
+        }
+
+        $limit_offset_without_query_symbol = substr($limit_offset, 1);
+
+        parse_str($limit_offset_without_query_symbol, $limit_offset_parsed_string);
+
+        $limit = intval($limit_offset_parsed_string["limit"]);
+
+        $offset = intval($limit_offset_parsed_string["offset"]);
+
         if (preg_match_all($pattern, $date)) {
-            $result = $this->allReservationsQuery->fetchWithDate($date);
+            $result = $this->allReservationsQuery->fetchWithDateLimitOffset($date, $limit, $offset);
 
             return $result;
         } else {
@@ -521,5 +551,4 @@ class ReservationController extends UserController
 
         return true;
     }
-
 }
