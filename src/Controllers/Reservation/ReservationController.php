@@ -90,23 +90,25 @@ class ReservationController extends UserController
 
         $reservation_time = $date . " " . $time;
 
-        /**
-         * Today's Date
-         */
+        // $reservation_time_datetime = new DateTime($reservation_time);
 
-        $todaysDate = new DateTimeImmutable();
+        // /**
+        //  * Today's Date
+        //  */
 
-        /**
-         * Today's Date in YYYY-MM-DD HH:MM format
-         */
+        // $todaysDate = new DateTimeImmutable();
 
-        $todaysDateFormatted = $todaysDate->format('o-m-d G:i');
+        // /**
+        //  * Today's Date in YYYY-MM-DD HH:MM format
+        //  */
+
+        // $todaysDateFormatted = $todaysDate->format('o-m-d G:i');
 
         /**
          * Confirming that the new reservation is not for past time.
          */
 
-        if ($reservation_time < $todaysDateFormatted) {
+        if ($this->reservationPastTimeValidation($reservation_time) == true) {
 
             http_response_code(400);
             return new ReturnType(true, "CANNOT_CREATE_RESERVATION_FOR_PAST_TIME");
@@ -312,11 +314,11 @@ class ReservationController extends UserController
                 ...$read_reservation->data->reservation
             );
 
-            $todaysDate = new DateTimeImmutable();
+            // $todaysDate = new DateTimeImmutable();
 
-            $todaysDateFormatted = $todaysDate->format('o-m-d G:i');
+            // $todaysDateFormatted = $todaysDate->format('o-m-d G:i');
 
-            if ($read_reservation->data->reservation['reservation_time'] < $todaysDateFormatted) {
+            if ($this->reservationPastTimeValidation($read_reservation->data->reservation['reservation_time']) == true) {
                 http_response_code(400);
                 return new ReturnType(true, "CANNOT_CANCEL_PAST_RESERVATION");
             }
@@ -391,15 +393,15 @@ class ReservationController extends UserController
             return new ReturnType(true, "CANNOT_UPDATE_ALREADY_CANCELLED_RESERVATION");
         }
 
-        $todaysDate = new DateTimeImmutable();
+        // $todaysDate = new DateTimeImmutable();
 
-        $todaysDateFormatted = $todaysDate->format('o-m-d G:i');
+        // $todaysDateFormatted = $todaysDate->format('o-m-d G:i');
 
         /**
          * Cannot update a past reservation
          */
 
-        if ($read_reservation->data->reservation['reservation_time'] < $todaysDateFormatted) {
+        if ($this->reservationPastTimeValidation($read_reservation->data->reservation['reservation_time'])) {
             http_response_code(400);
             return new ReturnType(true, "CANNOT_UPDATE_PAST_RESERVATION");
         }
@@ -436,7 +438,7 @@ class ReservationController extends UserController
                          * Cannot update the reservation to past time
                          */
 
-                        if ($_PUT["reservation_time"] < $todaysDateFormatted) {
+                        if ($this->reservationPastTimeValidation($_PUT["reservation_time"])) {
                             http_response_code(400);
                             return new ReturnType(true, "CANNOT_UPDATE_RESERVATION_TO_PAST_TIME");
                         }
@@ -541,6 +543,8 @@ class ReservationController extends UserController
         }
     }
 
+
+
     private function reservationTimeValidation(string $reservation_time)
     {
         $pattern = "/\d{4}-[0-1]{1}[0-9]{1}-[0-3]{1}[0-9]{1} [0-2]{1}[0-9]{1}:[0-9]{1}[0-9]{1}/";
@@ -550,5 +554,32 @@ class ReservationController extends UserController
         }
 
         return true;
+    }
+
+    private function reservationPastTimeValidation(string $reservation_time)
+    {
+        $reservation_time_datetime = new DateTime($reservation_time);
+
+        /**
+         * Today's Date
+         */
+
+        $todaysDate = new DateTimeImmutable();
+
+        /**
+         * Today's Date in YYYY-MM-DD HH:MM format
+         */
+
+        $todaysDateFormatted = $todaysDate->format('o-m-d G:i');
+
+        /**
+         * Confirming that the new reservation is not for past time.
+         */
+
+        if ($reservation_time_datetime < $todaysDate) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }
