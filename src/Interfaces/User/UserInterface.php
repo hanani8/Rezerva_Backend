@@ -13,7 +13,6 @@ interface UserInterface
 {
     /**Constructor Function */
     public function __construct(
-        int $userid,
         string $username,
         string $password,
     );

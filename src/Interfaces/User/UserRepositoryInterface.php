@@ -26,7 +26,7 @@ interface UserRepositoryInterface
      * @param string $username
      * @return ReturnType
      */
-    public function read(int $userid = 0, string $username = ""): ReturnType;
+    public function read(string $username = ""): ReturnType;
 
     public function create(User $user, int $restaurant_id);
 }

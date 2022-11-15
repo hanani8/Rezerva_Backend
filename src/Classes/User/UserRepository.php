@@ -31,15 +31,14 @@ class UserRepository implements UserRepositoryInterface
     /**
      * Read a row from user table in DB, based on the provided user_id or username
      *
-     * @param integer $user_id
      * @param string $username
      * @return ReturnType
      */
-    public function read(int $user_id = 0, string $username = ""): ReturnType
+    public function read(string $username = ""): ReturnType
     {
-        $prepared_statement = 'SELECT * FROM "Rezerva"."User" where user_id = ? OR username = ?';
+        $prepared_statement = 'SELECT * FROM "Rezerva"."User" where username = ?';
 
-        $values = array($user_id, $username);
+        $values = array($username);
 
         $resultOfDBOperation = $this->db->query($prepared_statement, $values);
 

@@ -29,9 +29,8 @@ class User implements UserInterface
      */
     private string $password;
 
-    public function __construct(int $user_id, string $username, string $password)
+    public function __construct(string $username, string $password)
     {
-        $this->user_id = $user_id;
         $this->username = $username;
         $this->password = $password;
     }
