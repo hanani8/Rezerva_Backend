@@ -75,24 +75,25 @@ class DashboardController
             if ($result->error == false) {
 
                 for ($i = 0; $i < count($result->data->reservations); $i++) {
-                    /**
-                     * Checking for reservation. Type = 1 = Reservation
-                     */
-                    if ($result->data->reservations[$i]["type"] == '1') {
-                        $data->reservations += 1;
-                        /**
-                         * Checking for walkin. Type = 2 = Walk-In
-                         */
-                    } elseif ($result->data->reservations[$i]["type"] == '2') {
-                        $data->walkIns += 1;
-                    }
+
 
                     /**
                      * Checking for waitlised reservations/walkins
                      */
-                    if($result->data->reservations[$i]["status"] == '1')
-                    {
+                    if ($result->data->reservations[$i]["status"] == '1') {
                         $data->waitlists += 1;
+                    } else {
+                        /**
+                         * Checking for reservation. Type = 1 = Reservation
+                         */
+                        if ($result->data->reservations[$i]["type"] == '1') {
+                            $data->reservations += 1;
+                            /**
+                             * Checking for walkin. Type = 2 = Walk-In
+                             */
+                        } elseif ($result->data->reservations[$i]["type"] == '2') {
+                            $data->walkIns += 1;
+                        }
                     }
                 }
 
