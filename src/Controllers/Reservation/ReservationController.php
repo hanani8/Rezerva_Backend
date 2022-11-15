@@ -48,8 +48,7 @@ class ReservationController extends UserController
             "date",
             "time",
             "status",
-            "type",
-            "table"
+            "type"
         ];
 
         /**
@@ -124,7 +123,11 @@ class ReservationController extends UserController
          * Table No
          */
 
-        $table = $_POST["table"];
+        $table = "";
+
+        if (array_key_exists("table", $_POST)) {
+            $table = $_POST["table"];
+        }
 
 
         /**
@@ -458,8 +461,13 @@ class ReservationController extends UserController
                     $values = array();
                     array_push($names, $key);
                     $status = intval($value);
-                    array_push($values, 2);
-                    break 2;
+                    if ($status == 2 || $status == 0) {
+                        array_push($values, $status);
+                        break 2;
+                    } else {
+                        http_response_code(400);
+                        return new ReturnType(true, "UNDEFINED_STATUS");
+                    }
 
                 case "type":
                     array_push($names, $key);
