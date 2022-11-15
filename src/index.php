@@ -69,6 +69,10 @@ $session = new Session();
  */
 $userController = new UserController($db, $session);
 /**
+ * Creating RestaurantController Class to get Restaurant Details
+ */
+$restaurantController = new RestaurantController($db);
+/**
  * Reservation Controller, and Dashboard Controller.
  * To be instantiated only after the user if logged in, lest there will be a error in the construction functions of both the controllers.
  */
@@ -270,6 +274,21 @@ $router->addRoute(
     'GET'
 );
 
+// /api/restaurant/[int:id] - GET
+
+$router->addRoute(
+    '/api/restaurant/[i:restaurant_id]',
+    function ($route, $parameters)
+    {
+        global $restaurantController;
+
+        $result = $restaurantController->ReadRestaurantAction($route, $parameters);
+
+        return $result;
+    },
+    'GET'
+);
+
 /**
  * Non-trivial HTTP requests like POST, PUT, etc... auto-triggers a preflight-request of OPTIONS type.
  * Handling it here.
@@ -318,7 +337,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
         /**
          * Only accept /login, /isloggedin requests when the user is not logged in, since the user needs these routes to authenticate himself.
          */
-        if ($_SERVER['REQUEST_URI'] == '/api/login' || $_SERVER['REQUEST_URI'] == '/api/isloggedin' || $_SERVER['REQUEST_URI'] == '/api') {
+        if ($_SERVER['REQUEST_URI'] == '/api/login' || $_SERVER['REQUEST_URI'] == '/api/isloggedin' || $_SERVER['REQUEST_URI'] == '/api' || preg_match_all("/\/api\/restaurant\/\d*/" , $_SERVER['REQUEST_URI']) ){
             $result = $router->callRoute($_SERVER['REQUEST_URI']);
 
             echo json_encode($result);
