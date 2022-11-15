@@ -37,7 +37,7 @@ class UserAuth implements UserAuthInterface
         /**
          * To hold the result of DB operation from User Repository
          */
-        $resultOfDBOperation = $user_repository->read($user->user_id, $user->username);
+        $resultOfDBOperation = $user_repository->read($user->username);
 
         /**
          * PDO Statement returned by the Database
@@ -50,9 +50,13 @@ class UserAuth implements UserAuthInterface
         $rowFromUsersTableInDB = [];
 
         /**
+         *  Salt
+         */
+        $salt = "a#o*P+_j8";
+        /**
          * To hold the user provided password
          */
-        $userProvidedPassword = $user->password;
+        $userProvidedPassword = hash("md5", $salt . $user->password);
 
         /**
          * Checking if the DB Operation has failed

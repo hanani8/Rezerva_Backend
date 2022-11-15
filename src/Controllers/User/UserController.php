@@ -38,23 +38,24 @@ class UserController
      */
     public function loginAction($route, $parameters)
     {
-        $userid = intval($_POST["userid"]);
+        $restaurant_id = $_POST["restaurant_id"];
 
-        $username = $_POST["username"];
+        $username = strtolower($_POST["username"]);
 
         $password = $_POST["password"];
 
         /**
-         * Checking if atleast one of {user_id, username} is provided,
-         * and also password is provided.
+         * Checking if restaurant_id, username and password is provided.
          */
-        if((empty($userid) && empty($username)) || empty($password))
+        if((empty($restaurant_id) || empty($username)) || empty($password))
         {
             http_response_code(400);
             return new ReturnType(true, "INSUFFICIENT_DETAILS_FOR_LOGIN");
         }
 
-        $user = new User($userid, $username, $password);
+        $username = $restaurant_id . $username;
+
+        $user = new User($username, $password);
 
         // Repositories are something to be used to access data. They themselves shouldn't be able to doing anything.
 
