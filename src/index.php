@@ -71,7 +71,7 @@ $userController = new UserController($db, $session);
 /**
  * Creating RestaurantController Class to get Restaurant Details
  */
-$restaurantController = new RestaurantController($db);
+$restaurantController = new RestaurantController($db, $session);
 /**
  * Reservation Controller, and Dashboard Controller.
  * To be instantiated only after the user if logged in, lest there will be a error in the construction functions of both the controllers.
@@ -283,6 +283,21 @@ $router->addRoute(
         global $restaurantController;
 
         $result = $restaurantController->ReadRestaurantAction($route, $parameters);
+
+        return $result;
+    },
+    'GET'
+);
+
+// /api/restaurant - GET
+
+$router->addRoute(
+    '/api/restaurant',
+    function ($route, $parameters)
+    {
+        global $restaurantController;
+
+        $result = $restaurantController->ReadRestaurantWithoutParameterAction($route, $parameters);
 
         return $result;
     },
