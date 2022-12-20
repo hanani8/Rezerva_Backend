@@ -15,16 +15,23 @@ class AllReservationsQuery implements AllReservationsQueryInterface
     private Database $db;
 
     /**
+     * Session
+     * 
+     * @var Session
+     */
+    private Session $session;
+
+    /**
      * Holds the Restaurant ID
      *
      * @var integer
      */
-    private int $restaurant_id;
+    // private int $restaurant_id;
 
     public function __construct(Database $db, Session $session)
     {
         $this->db = $db;
-        $this->restaurant_id = $session->restaurant_id;
+        $this->session = $session;
     }
 
     /**
@@ -40,7 +47,7 @@ class AllReservationsQuery implements AllReservationsQueryInterface
         /**
          * Values to fill-in the SQL Statement
          */
-        $values = array($this->restaurant_id);
+        $values = array($this->session->restaurant_id);
 
         $resultFromDBOperation = $this->db->query($prepared_statement, $values);
 
@@ -84,11 +91,11 @@ class AllReservationsQuery implements AllReservationsQueryInterface
         if ($limit == 0) {
             $prepared_statement = 'SELECT reservation_id, guest_name, no_of_guests, phone, instructions, status, created_by, created_at, reservation_time, type, "table"  FROM "Rezerva"."Reservation" WHERE restaurant_id = ? AND reservation_time >= ? AND reservation_time < ? ORDER BY created_at DESC LIMIT ALL OFFSET ?';
 
-            $values = array($this->restaurant_id, $date, $datePlusOneMoreDayString, $offset);
+            $values = array($this->session->restaurant_id, $date, $datePlusOneMoreDayString, $offset);
         } else {
             $prepared_statement = 'SELECT reservation_id, guest_name, no_of_guests, phone, instructions, status, created_by, created_at, reservation_time, type, "table"  FROM "Rezerva"."Reservation" WHERE restaurant_id = ? AND reservation_time >= ? AND reservation_time < ? ORDER BY created_at DESC LIMIT ? OFFSET ?';
 
-            $values = array($this->restaurant_id, $date, $datePlusOneMoreDayString, $limit, $offset);
+            $values = array($this->session->restaurant_id, $date, $datePlusOneMoreDayString, $limit, $offset);
         }
 
 

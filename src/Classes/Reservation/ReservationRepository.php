@@ -14,6 +14,11 @@ class ReservationRepository implements ReservationRepositoryInterface
     private Database $db;
 
     /**
+     * Session
+     */
+    private Session $session;
+
+    /**
      * To hold the Restaurant ID
      *
      * @var integer
@@ -34,9 +39,7 @@ class ReservationRepository implements ReservationRepositoryInterface
     {
         $this->db = $db;
 
-        $this->restaurant_id = $session->restaurant_id;
-
-        $this->user_id = $session->user_id;
+        $this->session = $session;
     }
 
     /**
@@ -49,7 +52,7 @@ class ReservationRepository implements ReservationRepositoryInterface
     {
         $prepared_statement = 'INSERT INTO "Rezerva"."Reservation" (restaurant_id, guest_name, no_of_guests, phone, instructions, reservation_time,  status, created_by, type, "table") VALUES (?,?,?,?,?,?,?,?,?,?) RETURNING reservation_id';
 
-        $values = array($this->restaurant_id, $reservation->guest_name, $reservation->no_of_guests, $reservation->phone, $reservation->instructions, $reservation->reservation_time, $reservation->status, $this->user_id, $reservation->type, $reservation->table);
+        $values = array($this->session->restaurant_id, $reservation->guest_name, $reservation->no_of_guests, $reservation->phone, $reservation->instructions, $reservation->reservation_time, $reservation->status, $this->session->id, $reservation->type, $reservation->table);
 
         $resultFromDBOperation = $this->db->query($prepared_statement, $values);
 
@@ -81,7 +84,7 @@ class ReservationRepository implements ReservationRepositoryInterface
 
         $prepared_statement = 'SELECT reservation_id, guest_name, no_of_guests, phone, instructions, status, created_by, created_at, type, reservation_time, "table" FROM "Rezerva"."Reservation" WHERE reservation_id = ? AND restaurant_id = ?';
 
-        $values = array($reservation_id, $this->restaurant_id);
+        $values = array($reservation_id, $this->session->restaurant_id);
 
         $resultFromDBOperation = $this->db->query($prepared_statement, $values);
 
@@ -118,7 +121,7 @@ class ReservationRepository implements ReservationRepositoryInterface
 
         $prepared_statement = 'UPDATE "Rezerva"."Reservation" SET guest_name = ?, no_of_guests = ?, phone = ?, instructions = ?, status = ?, type = ?, reservation_time = ? WHERE reservation_id = ? AND restaurant_id = ?';
 
-        $values = array($reservation->guest_name, $reservation->no_of_guests, $reservation->phone, $reservation->instructions, $reservation->status, $reservation->type, $reservation->reservation_time, $reservation_id, $this->restaurant_id);
+        $values = array($reservation->guest_name, $reservation->no_of_guests, $reservation->phone, $reservation->instructions, $reservation->status, $reservation->type, $reservation->reservation_time, $reservation_id, $this->session->restaurant_id);
 
         $resultFromDBOperation = $this->db->query($prepared_statement, $values);
 
@@ -150,18 +153,17 @@ class ReservationRepository implements ReservationRepositoryInterface
     {
         $prepared_statement = 'UPDATE "Rezerva"."Reservation" SET ';
 
-        foreach($names as $name)
-        {
-            $prepared_statement .= '"'.$name.'"' . ' = ?,';
+        foreach ($names as $name) {
+            $prepared_statement .= '"' . $name . '"' . ' = ?,';
         }
 
-        $prepared_statement = substr ($prepared_statement, 0, -1);
+        $prepared_statement = substr($prepared_statement, 0, -1);
 
         $prepared_statement .= ' WHERE reservation_id = ? AND restaurant_id = ?';
 
         array_push($values, $reservation_id);
 
-        array_push($values, $this->restaurant_id);
+        array_push($values, $this->session->restaurant_id);
 
         $resultFromDBOperation = $this->db->query($prepared_statement, $values);
 
