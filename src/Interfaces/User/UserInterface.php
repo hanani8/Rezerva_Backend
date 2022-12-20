@@ -15,6 +15,8 @@ interface UserInterface
     public function __construct(
         string $username,
         string $password,
+        int $restaurant_id,
+        string $phone
     );
 
     /**

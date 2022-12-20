@@ -28,5 +28,5 @@ interface UserRepositoryInterface
      */
     public function read(string $username = ""): ReturnType;
 
-    public function create(User $user, int $restaurant_id);
+    public function create(User $user);
 }

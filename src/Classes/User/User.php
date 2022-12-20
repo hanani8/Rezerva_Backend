@@ -29,10 +29,26 @@ class User implements UserInterface
      */
     private string $password;
 
-    public function __construct(string $username, string $password)
+    /**
+     * Holds Restaurant ID
+     * 
+     * @var int
+     */
+    private int $restaurant_id;
+
+    /**
+     * Holds Phone
+     * 
+     * @var string
+     */
+    private string $phone;
+
+    public function __construct(string $username, string $password, int $restaurant_id, string $phone = "")
     {
         $this->username = $username;
         $this->password = $password;
+        $this->restaurant_id = $restaurant_id;
+        $this->phone = $phone;
     }
 
     /**
@@ -45,5 +61,4 @@ class User implements UserInterface
     {
         return $this->$name;
     }
-
 }
