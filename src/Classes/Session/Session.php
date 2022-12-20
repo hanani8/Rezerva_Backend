@@ -10,7 +10,7 @@ class Session implements SessionInterface
     /**
      * To know if user is authenticated or not.
      *
-     * @var boolean
+     * @var bool
      */
     private $logged_in = false;
 
@@ -22,11 +22,13 @@ class Session implements SessionInterface
         session_start();
 
         /**
-         * Checking is user is already authenticated. If yes, set $this->logged_in to true.
+         * Checking is user/admin/superadmin is already authenticated.
          */
-        if (isset($_SESSION['user_id'])) {
+        if(isset($_SESSION['id']))
+        {
             $this->logged_in = true;
-        }
+        } 
+        
     }
 
 
@@ -45,7 +47,7 @@ class Session implements SessionInterface
     /**
      * Gets value from $_SESSION array
      */
-    public function __get(string $name): int|string
+    public function __get(string $name): int|string|null
     {
         return $_SESSION[$name];
     }
@@ -58,18 +60,28 @@ class Session implements SessionInterface
     public function remove(): void
     {
 
-        $this->logged_in = false;
+        $this->logged_in = 0;
         session_destroy();
+        unset($_SESSION);
+    }
+
+    /**
+     * Unsets all $_SESSION array variables
+     */
+
+    public function unset(): void
+    {
         unset($_SESSION);
     }
 
     /**
      * returns $this->logged_in variable.
      *
-     * @return boolean
+     * @return int
      */
     public function is_logged_in(): bool
     {
         return $this->logged_in;
     }
+
 }

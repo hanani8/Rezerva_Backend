@@ -29,7 +29,7 @@ interface SessionInterface
      * @param string $name
      * @return integer|string
      */
-    public function __get(string $name): int|string;
+    public function __get(string $name): int|string|null;
 
     /**
      * To unset all values from session array, and destroy the session
@@ -41,7 +41,7 @@ interface SessionInterface
     /**
      * Returns the is_logged_in variable
      *
-     * @return boolean
+     * @return bool
      */
     public function is_logged_in(): bool;
 }
