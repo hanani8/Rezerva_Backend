@@ -36,7 +36,11 @@ function myAutoLoader($className)
         'Session/',
         'User/',
         'Dashboard/',
-        'Restaurant/'
+        'Restaurant/',
+        'Brand/',
+        'Admin/',
+        'Superadmin/',
+        'Auth/'
     );
 
     foreach ($directorys as $directory) {
