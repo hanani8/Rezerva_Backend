@@ -574,6 +574,8 @@ class ReservationController extends UserController
 
         $todaysDate = new DateTimeImmutable();
 
+        $todaysDate = $todaysDate->sub(new DateInterval('PT30M'));
+
         /**
          * Today's Date in YYYY-MM-DD HH:MM format
          */
