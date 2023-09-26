@@ -59,5 +59,3 @@ To configure Rezerva for your environment:
 
 3. Ensure your web server (e.g., Apache, Nginx) is correctly configured to serve PHP scripts.
 ---
-
-Thank you for choosing Rezerva! Simplify restaurant reservations and enhance the dining experience for both solo and duo diners.
